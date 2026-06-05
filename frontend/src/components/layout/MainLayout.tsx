@@ -7,19 +7,25 @@ interface MainLayoutProps {
   toggleDarkMode: () => void;
 }
 
-export function MainLayout({ children, darkMode, toggleDarkMode }: MainLayoutProps) {
+export function MainLayout({
+  children,
+  darkMode,
+  toggleDarkMode,
+}: MainLayoutProps) {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="flex h-screen flex-col bg-white dark:bg-slate-950">
+      {/* Navbar - Fixed at top */}
       <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
 
-      <div className="flex pt-16">
-        {/* Desktop Sidebar */}
-        <div className="hidden lg:block w-64 shrink-0 h-[calc(100vh-4rem)] sticky top-16">
+      {/* Below navbar - flex row */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar - Desktop only */}
+        <aside className="hidden w-64 flex-shrink-0 border-r border-slate-200 dark:border-slate-800 overflow-y-auto lg:block">
           <Sidebar />
-        </div>
+        </aside>
 
-        {/* Main Content */}
-        <main className="flex-1 min-h-[calc(100vh-4rem)] p-4 lg:p-8 overflow-auto">
+        {/* Main content - Fills remaining space */}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           {children}
         </main>
       </div>

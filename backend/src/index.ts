@@ -4,6 +4,7 @@ import { config } from './config';
 import connectToDatabase from './config/database';
 import { logger } from './utils/logger';
 import { errorHandler } from './middleware/error';
+import { seedDatabase } from './db/seed';
 
 import courseRoutes from './routes/courses.routes';
 import studentRoutes from './routes/students.routes';
@@ -51,6 +52,9 @@ async function startServer(): Promise<void> {
   try {
     // Connect to MongoDB
     await connectToDatabase();
+
+    // Seed database
+    await seedDatabase();
 
     // Start HTTP server
     app.listen(config.port, () => {
