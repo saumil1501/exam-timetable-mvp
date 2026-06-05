@@ -20,6 +20,10 @@ export interface ITimetable extends Document {
     maxDays: number;
     examDurationMins: number;
     breakDurationMins: number;
+    startDate: string;
+    morningStartTime: string;
+    afternoonStartTime: string;
+    eveningStartTime?: string;
   };
   courseIds: Schema.Types.ObjectId[];
   slots: IExamSlot[];
@@ -34,41 +38,116 @@ export interface ITimetable extends Document {
 
 const examSlotSchema = new Schema<IExamSlot>(
   {
-    courseId: { type: Schema.Types.ObjectId, ref: 'Course', required: true },
-    slotNumber: { type: Number, required: true },
-    day: { type: Number, required: true },
-    timeSlot: { type: String, required: true, enum: ['Morning', 'Afternoon', 'Evening'] },
-    examDate: Date,
-    startTime: String,
-    endTime: String,
+    courseId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Course',
+      required: true,
+    },
+    slotNumber: {
+      type: Number,
+      required: true,
+    },
+    day: {
+      type: Number,
+      required: true,
+    },
+    timeSlot: {
+      type: String,
+      required: true,
+      enum: ['Morning', 'Afternoon', 'Evening'],
+    },
+    examDate: {
+      type: Date,
+    },
+    startTime: {
+      type: String,
+    },
+    endTime: {
+      type: String,
+    },
   },
   { _id: false }
 );
 
 const timetableSchema = new Schema<ITimetable>(
   {
-    name: { type: String, required: true, trim: true, maxlength: 200 },
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 200,
+    },
     description: String,
     academicYear: String,
     semester: Number,
     config: {
       type: {
-        slotsPerDay: { type: Number, required: true },
-        maxDays: { type: Number, required: true },
-        examDurationMins: { type: Number, required: true },
-        breakDurationMins: { type: Number, default: 30 },
+        slotsPerDay: {
+          type: Number,
+          required: true,
+        },
+        maxDays: {
+          type: Number,
+          required: true,
+        },
+        examDurationMins: {
+          type: Number,
+          required: true,
+        },
+        breakDurationMins: {
+          type: Number,
+          default: 30,
+        },
+        startDate: {
+          type: String,
+          required: true,
+        },
+        morningStartTime: {
+          type: String,
+          required: true,
+        },
+        afternoonStartTime: {
+          type: String,
+          required: true,
+        },
+        eveningStartTime: {
+          type: String,
+        },
       },
       required: true,
     },
-    courseIds: [{ type: Schema.Types.ObjectId, ref: 'Course' }],
+    courseIds: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Course',
+      },
+    ],
     slots: [examSlotSchema],
-    totalSlotsUsed: { type: Number, default: 0 },
-    totalDaysUsed: { type: Number, default: 0 },
-    conflictsFound: { type: Number, default: 0 },
-    generationTimeMs: { type: Number, default: 0 },
-    status: { type: String, enum: ['draft', 'finalized', 'archived'], default: 'draft' },
+    totalSlotsUsed: {
+      type: Number,
+      default: 0,
+    },
+    totalDaysUsed: {
+      type: Number,
+      default: 0,
+    },
+    conflictsFound: {
+      type: Number,
+      default: 0,
+    },
+    generationTimeMs: {
+      type: Number,
+      default: 0,
+    },
+    status: {
+      type: String,
+      enum: ['draft', 'finalized', 'archived'],
+      default: 'draft',
+    },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
 timetableSchema.index({ status: 1 });

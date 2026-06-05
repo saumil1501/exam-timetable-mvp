@@ -31,7 +31,7 @@ export function validateRequest(schema: z.ZodSchema) {
       next();
     } catch (error: any) {
       if (error instanceof z.ZodError) {
-        const messages = error.errors.map((e) => `${e.path.join('.')}: ${e.message}`);
+        const messages = error.issues.map((e: any) => `${e.path.join('.')}: ${e.message}`);
         return res.status(400).json({
           success: false,
           error: messages.join(', '),

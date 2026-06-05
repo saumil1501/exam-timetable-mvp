@@ -43,7 +43,7 @@ router.get('/:id', async (req, res) => {
 
     res.json({ success: true, data: course });
   } catch (error: any) {
-    logger.error(`GET /courses/:id error:`, error);
+    logger.error('GET /courses/:id error:', error);
     res.status(400).json({ success: false, error: error.message });
   }
 });

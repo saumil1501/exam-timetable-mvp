@@ -4,12 +4,13 @@ import { config } from './config';
 import connectToDatabase from './config/database';
 import { logger } from './utils/logger';
 import { errorHandler } from './middleware/error';
-import { seedDatabase } from './db/seed';
+// import { seedDatabase } from './db/seed';
 
 import courseRoutes from './routes/courses.routes';
 import studentRoutes from './routes/students.routes';
 import enrollmentRoutes from './routes/enrollments.routes';
 import timetableRoutes from './routes/timetables.routes';
+import statsRoutes from './routes/stats.routes';
 
 const app = express();
 
@@ -34,10 +35,12 @@ app.get('/health', (_req, res) => {
   });
 });
 
+// API Routes
 app.use('/api/courses', courseRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/enrollments', enrollmentRoutes);
 app.use('/api/timetables', timetableRoutes);
+app.use('/api/stats', statsRoutes);
 
 // 404 handler
 app.use((_req, res) => {
@@ -54,7 +57,7 @@ async function startServer(): Promise<void> {
     await connectToDatabase();
 
     // Seed database
-    await seedDatabase();
+    // await seedDatabase();
 
     // Start HTTP server
     app.listen(config.port, () => {

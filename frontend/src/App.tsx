@@ -7,6 +7,7 @@ import Students from '@/pages/Students';
 import Enrollments from '@/pages/Enrollments';
 import Generate from '@/pages/Generate';
 import Timetables from '@/pages/Timetables';
+import ViewTimetable from '@/pages/ViewTimetable';
 
 function App() {
   const [darkMode, setDarkMode] = useState(() => {
@@ -38,6 +39,18 @@ function App() {
           <Route path="/enrollments" element={<Enrollments />} />
           <Route path="/generate" element={<Generate />} />
           <Route path="/timetables" element={<Timetables />} />
+          <Route path="/timetables/:id" element={<ViewTimetable />} />
+          <Route
+            path="*"
+            element={
+              <div className="flex flex-col items-center justify-center h-[60vh] text-center">
+                <h1 className="text-6xl font-bold text-muted-foreground">404</h1>
+                <p className="text-lg text-muted-foreground mt-2">
+                  Page not found
+                </p>
+              </div>
+            }
+          />
         </Routes>
       </MainLayout>
     </BrowserRouter>
