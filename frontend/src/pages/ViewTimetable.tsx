@@ -9,7 +9,7 @@ import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Badge } from '@/components/ui/badge';
 import CalendarView from '@/components/timetable/CalendarView';
 import GridView from '@/components/timetable/GridView';
-import { exportToPDF, exportToPNG } from '@/utils/export';
+import { exportTimetablePDF, exportTimetablePNG } from '@/utils/export';
 
 export default function ViewTimetable() {
   const { id } = useParams<{ id: string }>();
@@ -111,14 +111,14 @@ export default function ViewTimetable() {
         <div className="flex gap-2">
           <Button
     variant="outline"
-    onClick={() => exportToPDF('timetable-content', `${timetable.name}.pdf`)}
+    onClick={() => exportTimetablePDF(timetable)}
   >
     Export PDF
   </Button>
 
   <Button
     variant="outline"
-    onClick={() => exportToPNG('timetable-content', `${timetable.name}.png`)}
+    onClick={() => exportTimetablePNG(timetable)}
   >
     Export PNG
   </Button>
@@ -214,6 +214,140 @@ export default function ViewTimetable() {
         </Card>
       )}
       </div>
+
+      {/* Hidden Export Layout */}
+
+<div
+  id="timetable-export"
+  style={{
+    position: 'absolute',
+    left: '-99999px',
+
+    backgroundColor: '#ffffff',
+
+    color: '#000000',
+
+    width: '1200px',
+
+    padding: '40px',
+  }}
+>
+  <h1
+    style={{
+      fontSize: '28px',
+      marginBottom: '10px',
+    }}
+  >
+    {timetable.name}
+  </h1>
+
+  <p
+    style={{
+      marginBottom: '20px',
+    }}
+  >
+    Examination Timetable
+  </p>
+
+  <table
+    style={{
+      width: '100%',
+      borderCollapse: 'collapse',
+    }}
+  >
+    <thead>
+      <tr>
+        <th style={{ border: '1px solid black', padding: '10px' }}>
+          Date
+        </th>
+
+        <th style={{ border: '1px solid black', padding: '10px' }}>
+          Session
+        </th>
+
+        <th style={{ border: '1px solid black', padding: '10px' }}>
+          Start
+        </th>
+
+        <th style={{ border: '1px solid black', padding: '10px' }}>
+          End
+        </th>
+
+        <th style={{ border: '1px solid black', padding: '10px' }}>
+          Course
+        </th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {timetable.slots.map(
+        (
+          slot: any,
+          index: number
+        ) => (
+          <tr key={index}>
+            <td
+              style={{
+                border:
+                  '1px solid black',
+                padding:
+                  '10px',
+              }}
+            >
+              {new Date(
+                slot.examDate
+              ).toLocaleDateString()}
+            </td>
+
+            <td
+              style={{
+                border:
+                  '1px solid black',
+                padding:
+                  '10px',
+              }}
+            >
+              {slot.timeSlot}
+            </td>
+
+            <td
+              style={{
+                border:
+                  '1px solid black',
+                padding:
+                  '10px',
+              }}
+            >
+              {slot.startTime}
+            </td>
+
+            <td
+              style={{
+                border:
+                  '1px solid black',
+                padding:
+                  '10px',
+              }}
+            >
+              {slot.endTime}
+            </td>
+
+            <td
+              style={{
+                border:
+                  '1px solid black',
+                padding:
+                  '10px',
+              }}
+            >
+              {slot.courseId?.code}
+            </td>
+          </tr>
+        )
+      )}
+    </tbody>
+  </table>
+</div>
 
       {/* Back Button */}
       <Button
