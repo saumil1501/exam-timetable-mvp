@@ -1,8 +1,29 @@
-import { useState, useCallback } from 'react';
-import { Plus, Search, MoreVertical, Edit2, Trash2 } from 'lucide-react';
+import {
+  useState,
+  useCallback,
+} from 'react';
+
+import {
+  Plus,
+  Search,
+  MoreVertical,
+  Edit2,
+  Trash2,
+  Users,
+  GraduationCap,
+  Mail,
+} from 'lucide-react';
+
 import { useStudents } from '@/hooks/useStudents';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+
+import {
+  Button,
+} from '@/components/ui/button';
+
+import {
+  Input,
+} from '@/components/ui/input';
+
 import {
   Table,
   TableBody,
@@ -11,226 +32,592 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { EmptyState } from '@/components/common/EmptyState';
-import { DataTablePagination } from '@/components/common/DataTablePagination';
-import { StudentDialog } from '@/components/students/StudentDialog';
-import { DeleteStudentDialog } from '@/components/students/DeleteStudentDialog';
-import { Users } from 'lucide-react';
+
+import {
+  LoadingSpinner,
+} from '@/components/common/LoadingSpinner';
+
+import {
+  EmptyState,
+} from '@/components/common/EmptyState';
+
+import {
+  DataTablePagination,
+} from '@/components/common/DataTablePagination';
+
+import {
+  StudentDialog,
+} from '@/components/students/StudentDialog';
+
+import {
+  DeleteStudentDialog,
+} from '@/components/students/DeleteStudentDialog';
 
 export default function Students() {
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState('');
-  const [searchInput, setSearchInput] = useState('');
-  const [openDialog, setOpenDialog] = useState(false);
-  const [deleteDialog, setDeleteDialog] = useState(false);
-  const [selectedStudent, setSelectedStudent] = useState<any>(null);
-  const [isEditing, setIsEditing] = useState(false);
 
-  const { students, loading, fetchStudents, createStudent, updateStudent, deleteStudent } =
-    useStudents();
+  const [page, setPage] =
+    useState(1);
 
-  const handleSearch = useCallback(() => {
-    setSearch(searchInput);
-    setPage(1);
-  }, [searchInput]);
+  const [search, setSearch] =
+    useState('');
 
-  const handleAddStudent = useCallback(
-    async (data: any) => {
-      try {
+  const [searchInput, setSearchInput] =
+    useState('');
+
+  const [openDialog, setOpenDialog] =
+    useState(false);
+
+  const [deleteDialog, setDeleteDialog] =
+    useState(false);
+
+  const [selectedStudent, setSelectedStudent] =
+    useState<any>(null);
+
+  const [isEditing, setIsEditing] =
+    useState(false);
+
+  const {
+    students,
+    loading,
+    fetchStudents,
+    createStudent,
+    updateStudent,
+    deleteStudent,
+  } = useStudents();
+
+  const handleSearch =
+    useCallback(() => {
+      setSearch(searchInput);
+      setPage(1);
+    }, [searchInput]);
+
+  const handleAddStudent =
+    useCallback(
+      async (data: any) => {
+
         await createStudent(data);
+
         setOpenDialog(false);
-        await fetchStudents(page, 10, search);
-      } catch (error: any) {
-        console.error('Error creating student:', error.message);
-      }
-    },
-    [createStudent, fetchStudents, page, search]
-  );
 
-  const handleEditStudent = (student: any) => {
-    setSelectedStudent(student);
-    setIsEditing(true);
-    setOpenDialog(true);
-  };
+        fetchStudents(
+          page,
+          10,
+          search
+        );
+      },
+      [
+        createStudent,
+        fetchStudents,
+        page,
+        search,
+      ]
+    );
 
-  const handleUpdateStudent = useCallback(
-    async (data: any) => {
-      try {
-        if (selectedStudent) {
-          await updateStudent(selectedStudent._id, data);
-          setOpenDialog(false);
-          setSelectedStudent(null);
-          setIsEditing(false);
-          await fetchStudents(page, 10, search);
-        }
-      } catch (error: any) {
-        console.error('Error updating student:', error.message);
-      }
-    },
-    [selectedStudent, updateStudent, fetchStudents, page, search]
-  );
+  const handleEditStudent =
+    (
+      student: any
+    ) => {
+      setSelectedStudent(student);
+      setIsEditing(true);
+      setOpenDialog(true);
+    };
 
-  const handleDeleteStudent = (student: any) => {
-    setSelectedStudent(student);
-    setDeleteDialog(true);
-  };
+  const handleUpdateStudent =
+    useCallback(
+      async (data: any) => {
 
-  const handleConfirmDelete = useCallback(async () => {
-    try {
-      if (selectedStudent) {
-        await deleteStudent(selectedStudent._id);
-        setDeleteDialog(false);
-        setSelectedStudent(null);
-        await fetchStudents(page, 10, search);
-      }
-    } catch (error: any) {
-      console.error('Error deleting student:', error.message);
-    }
-  }, [selectedStudent, deleteStudent, fetchStudents, page, search]);
+        if (!selectedStudent)
+          return;
 
-  const handleDialogClose = () => {
-    setOpenDialog(false);
-    setSelectedStudent(null);
-    setIsEditing(false);
-  };
+        await updateStudent(
+          selectedStudent._id,
+          data
+        );
 
-  const handlePageChange = useCallback(
-    async (newPage: number) => {
-      setPage(newPage);
-      await fetchStudents(newPage, 10, search);
-    },
-    [fetchStudents, search]
-  );
+        setSelectedStudent(
+          null
+        );
+
+        setOpenDialog(false);
+
+        setIsEditing(false);
+
+        fetchStudents(
+          page,
+          10,
+          search
+        );
+      },
+      [
+        selectedStudent,
+        updateStudent,
+        fetchStudents,
+        page,
+        search,
+      ]
+    );
+
+  const handleDeleteStudent =
+    (
+      student: any
+    ) => {
+      setSelectedStudent(student);
+      setDeleteDialog(true);
+    };
+
+  const confirmDelete =
+    async () => {
+
+      if (!selectedStudent)
+        return;
+
+      await deleteStudent(
+        selectedStudent._id
+      );
+
+      setDeleteDialog(false);
+
+      fetchStudents(
+        page,
+        10,
+        search
+      );
+    };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Students</h1>
-          <p className="mt-1 text-muted-foreground">Manage your students</p>
+    <div className="space-y-8">
+
+      {/* HERO */}
+
+      <div
+        className="
+          rounded-3xl
+          bg-gradient-to-r
+          from-teal-600
+          to-cyan-700
+          text-white
+          p-8
+        "
+      >
+        <div className="flex items-center gap-4">
+
+          <div
+            className="
+              h-16
+              w-16
+              rounded-2xl
+              bg-white/10
+              flex
+              items-center
+              justify-center
+            "
+          >
+            <Users className="h-8 w-8" />
+          </div>
+
+          <div>
+
+            <h1
+              className="
+                text-4xl
+                font-bold
+              "
+            >
+              Manage Students
+            </h1>
+
+            <p
+              className="
+                mt-2
+                text-cyan-100
+              "
+            >
+              Manage students,
+              registrations and
+              academic records.
+            </p>
+
+          </div>
+
         </div>
-        <Button onClick={() => setOpenDialog(true)} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Add Student
-        </Button>
       </div>
 
-      {/* Search */}
+      {/* SUMMARY */}
+
+      <div
+        className="
+          grid
+          md:grid-cols-3
+          gap-4
+        "
+      >
+
+        <Card>
+
+          <CardContent className="p-6">
+
+            <p
+              className="
+                text-sm
+                text-muted-foreground
+              "
+            >
+              Total Students
+            </p>
+
+            <p
+              className="
+                mt-2
+                text-4xl
+                font-bold
+                text-teal-600
+              "
+            >
+              {students.length}
+            </p>
+
+          </CardContent>
+
+        </Card>
+
+        <Card>
+
+          <CardContent className="p-6">
+
+            <p
+              className="
+                text-sm
+                text-muted-foreground
+              "
+            >
+              Registered Emails
+            </p>
+
+            <p
+              className="
+                mt-2
+                text-4xl
+                font-bold
+                text-cyan-600
+              "
+            >
+              {
+                students.filter(
+                  (s: any) =>
+                    s.email
+                ).length
+              }
+            </p>
+
+          </CardContent>
+
+        </Card>
+
+        <Card>
+
+          <CardContent className="p-6">
+
+            <Button
+              onClick={() =>
+                setOpenDialog(
+                  true
+                )
+              }
+              className="
+                w-full
+                h-full
+              "
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add Student
+            </Button>
+
+          </CardContent>
+
+        </Card>
+
+      </div>
+
+      {/* SEARCH */}
+
       <Card>
-        <CardContent className="flex gap-2 pt-6">
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+
+        <CardHeader>
+
+          <CardTitle>
+            Search Students
+          </CardTitle>
+
+        </CardHeader>
+
+        <CardContent>
+
+          <div className="flex gap-3">
+
+            <div className="relative flex-1">
+
+              <Search
+                className="
+                  absolute
+                  left-3
+                  top-1/2
+                  h-4
+                  w-4
+                  -translate-y-1/2
+                  text-muted-foreground
+                "
+              />
+
               <Input
-                placeholder="Search students..."
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                value={
+                  searchInput
+                }
+                onChange={(
+                  e
+                ) =>
+                  setSearchInput(
+                    e.target
+                      .value
+                  )
+                }
+                placeholder="Search by code, name or email..."
                 className="pl-10"
               />
+
             </div>
+
+            <Button
+              onClick={
+                handleSearch
+              }
+            >
+              Search
+            </Button>
+
           </div>
-          <Button variant="outline" onClick={handleSearch}>
-            Search
-          </Button>
+
         </CardContent>
+
       </Card>
 
-      {/* Students Table */}
+      {/* DIRECTORY */}
+
       <Card>
-        <CardHeader className="border-b">
-          <CardTitle>All Students</CardTitle>
+
+        <CardHeader>
+
+          <CardTitle>
+            Student Directory
+          </CardTitle>
+
         </CardHeader>
+
         <CardContent className="p-0">
+
           {loading ? (
-            <div className="flex justify-center py-12">
+            <div className="py-16">
               <LoadingSpinner />
             </div>
-          ) : students.length === 0 ? (
+          ) : students.length ===
+            0 ? (
             <EmptyState
-              icon={<Users />}
-              title="No students found"
-              description="Start by adding your first student"
+              icon={
+                <GraduationCap />
+              }
+              title="No Students Found"
+              description="Add students to begin enrollment management."
             />
           ) : (
             <>
               <Table>
+
                 <TableHeader>
+
                   <TableRow>
-                    <TableHead>Code</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Department</TableHead>
-                    <TableHead className="w-12">Actions</TableHead>
+
+                    <TableHead>
+                      Student ID
+                    </TableHead>
+
+                    <TableHead>
+                      Name
+                    </TableHead>
+
+                    <TableHead>
+                      Email
+                    </TableHead>
+
+                    <TableHead>
+                      Department
+                    </TableHead>
+
+                    <TableHead />
+
                   </TableRow>
+
                 </TableHeader>
+
                 <TableBody>
-                  {students.map((student) => (
-                    <TableRow key={student._id} className="hover:bg-muted/50">
-                      <TableCell className="font-medium">{student.studentCode}</TableCell>
-                      <TableCell>{student.name}</TableCell>
-                      <TableCell>{student.email || '-'}</TableCell>
-                      <TableCell>{student.department || '-'}</TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() => handleEditStudent(student)}
-                              className="gap-2"
+
+                  {students.map(
+                    (
+                      student
+                    ) => (
+                      <TableRow
+                        key={
+                          student._id
+                        }
+                      >
+
+                        <TableCell className="font-semibold">
+                          {
+                            student.studentCode
+                          }
+                        </TableCell>
+
+                        <TableCell>
+                          {
+                            student.name
+                          }
+                        </TableCell>
+
+                        <TableCell>
+
+                          <div className="flex items-center gap-2">
+
+                            <Mail className="h-4 w-4 text-muted-foreground" />
+
+                            {student.email ||
+                              '-'}
+
+                          </div>
+
+                        </TableCell>
+
+                        <TableCell>
+                          {
+                            student.department ||
+                            '-'
+                          }
+                        </TableCell>
+
+                        <TableCell>
+
+                          <DropdownMenu>
+
+                            <DropdownMenuTrigger
+                              asChild
                             >
-                              <Edit2 className="h-4 w-4" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => handleDeleteStudent(student)}
-                              className="gap-2 text-red-600"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                              >
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+
+                            <DropdownMenuContent>
+
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleEditStudent(
+                                    student
+                                  )
+                                }
+                              >
+                                <Edit2 className="mr-2 h-4 w-4" />
+                                Edit
+                              </DropdownMenuItem>
+
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleDeleteStudent(
+                                    student
+                                  )
+                                }
+                              >
+                                <Trash2 className="mr-2 h-4 w-4 text-red-500" />
+                                Delete
+                              </DropdownMenuItem>
+
+                            </DropdownMenuContent>
+
+                          </DropdownMenu>
+
+                        </TableCell>
+
+                      </TableRow>
+                    )
+                  )}
+
                 </TableBody>
+
               </Table>
-              <DataTablePagination page={page} pages={1} onPageChange={handlePageChange} />
+
+              <DataTablePagination
+                page={page}
+                pages={1}
+                onPageChange={
+                  setPage
+                }
+              />
+
             </>
           )}
+
         </CardContent>
+
       </Card>
 
-      {/* Add/Edit Student Dialog */}
       <StudentDialog
         open={openDialog}
-        onOpenChange={handleDialogClose}
-        onSubmit={isEditing ? handleUpdateStudent : handleAddStudent}
-        initialData={isEditing ? selectedStudent : undefined}
-        isEditing={isEditing}
+        onOpenChange={() =>
+          setOpenDialog(
+            false
+          )
+        }
+        onSubmit={
+          isEditing
+            ? handleUpdateStudent
+            : handleAddStudent
+        }
+        initialData={
+          selectedStudent
+        }
+        isEditing={
+          isEditing
+        }
       />
 
-      {/* Delete Confirmation Dialog */}
       <DeleteStudentDialog
-        open={deleteDialog}
-        onOpenChange={setDeleteDialog}
-        onConfirm={handleConfirmDelete}
-        student={selectedStudent}
+        open={
+          deleteDialog
+        }
+        onOpenChange={
+          setDeleteDialog
+        }
+        onConfirm={
+          confirmDelete
+        }
+        student={
+          selectedStudent
+        }
       />
+
     </div>
   );
 }

@@ -1,363 +1,549 @@
-import { useParams, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import { ArrowLeft, Download, Trash2 } from 'lucide-react';
-import { useTimetables } from '@/hooks/useTimetables';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { Badge } from '@/components/ui/badge';
+import {
+  useParams,
+  useNavigate,
+} from 'react-router-dom';
+
+import {
+  useEffect,
+  useState,
+} from 'react';
+
+import {
+  ArrowLeft,
+  Download,
+  Trash2,
+  CalendarDays,
+  Users,
+  BookOpen,
+  AlertTriangle,
+} from 'lucide-react';
+
+import {
+  useTimetables,
+} from '@/hooks/useTimetables';
+
+import {
+  Button,
+} from '@/components/ui/button';
+
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/tabs';
+
+import {
+  LoadingSpinner,
+} from '@/components/common/LoadingSpinner';
+
+import {
+  Badge,
+} from '@/components/ui/badge';
+
 import CalendarView from '@/components/timetable/CalendarView';
+
 import GridView from '@/components/timetable/GridView';
-import { exportTimetablePDF, exportTimetablePNG } from '@/utils/export';
+
+import {
+  exportTimetablePDF,
+  exportTimetablePNG,
+} from '@/utils/export';
 
 export default function ViewTimetable() {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const { getTimetableById, deleteTimetable, getStatistics } = useTimetables();
 
-  const [timetable, setTimetable] = useState<any>(null);
-  const [stats, setStats] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [view, setView] = useState<'calendar' | 'grid'>('calendar');
+  const { id } =
+    useParams();
+
+  const navigate =
+    useNavigate();
+
+  const {
+    getTimetableById,
+    deleteTimetable,
+    getStatistics,
+  } = useTimetables();
+
+  const [timetable, setTimetable] =
+    useState<any>(null);
+
+  const [stats, setStats] =
+    useState<any>(null);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [view, setView] =
+    useState('calendar');
 
   useEffect(() => {
-    const loadTimetable = async () => {
-      if (!id) return;
 
-      setLoading(true);
-      try {
-        const result = await getTimetableById(id);
-        setTimetable(result);
+    const load =
+      async () => {
 
-        const statsResult = await getStatistics(id);
-        setStats(statsResult);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+        if (!id) return;
 
-    loadTimetable();
-  }, [id, getTimetableById, getStatistics]);
+        try {
 
-  const handleDelete = async () => {
-    if (confirm('Are you sure you want to delete this timetable?')) {
-      try {
-        await deleteTimetable(id!);
-        navigate('/timetables');
-      } catch (err: any) {
-        alert('Error: ' + err.message);
-      }
-    }
-  };
+          const data =
+            await getTimetableById(
+              id
+            );
 
-  if (loading) {
+          const statData =
+            await getStatistics(
+              id
+            );
+
+          setTimetable(data);
+
+          setStats(
+            statData
+          );
+
+        } finally {
+
+          setLoading(
+            false
+          );
+        }
+      };
+
+    load();
+
+  }, []);
+
+  if (
+    loading
+  ) {
     return (
-      <div className="flex justify-center py-12">
+      <div className="flex justify-center py-24">
         <LoadingSpinner />
       </div>
     );
   }
 
-  if (error || !timetable) {
+  if (
+    !timetable
+  ) {
     return (
-      <div className="space-y-6">
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/timetables')}
-          className="gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Timetables
-        </Button>
-
-        <Card className="border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30">
-          <CardContent className="pt-6">
-            <p className="text-red-700 dark:text-red-400">
-              {error || 'Timetable not found'}
-            </p>
-          </CardContent>
-        </Card>
+      <div>
+        Timetable not found
       </div>
     );
   }
 
-  const statusColor =
-    timetable.status === 'finalized'
-      ? 'bg-green-100 text-green-800'
-      : timetable.status === 'draft'
-      ? 'bg-blue-100 text-blue-800'
-      : 'bg-gray-100 text-gray-800';
+  const deleteSchedule =
+    async () => {
+
+      if (
+        !confirm(
+          'Delete timetable?'
+        )
+      ) {
+        return;
+      }
+
+      await deleteTimetable(
+        timetable._id
+      );
+
+      navigate(
+        '/timetables'
+      );
+    };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-3xl font-bold">{timetable.name}</h1>
-            <Badge className={statusColor}>
-              {timetable.status.toUpperCase()}
-            </Badge>
+    <div className="space-y-8">
+
+      {/* HERO */}
+
+      <div
+        className="
+          rounded-3xl
+          bg-gradient-to-r
+          from-primary
+          to-blue-700
+          text-white
+          p-8
+        "
+      >
+
+        <div
+          className="
+            flex
+            justify-between
+            items-start
+            gap-6
+          "
+        >
+
+          <div>
+
+            <div
+              className="
+                flex
+                items-center
+                gap-3
+              "
+            >
+
+              <h1
+                className="
+                  text-4xl
+                  font-bold
+                "
+              >
+                {
+                  timetable.name
+                }
+              </h1>
+
+              <Badge
+                className="
+                  bg-white/20
+                  text-white
+                  border-0
+                "
+              >
+                {
+                  timetable.status
+                }
+              </Badge>
+
+            </div>
+
+            <p
+              className="
+                mt-3
+                text-blue-100
+              "
+            >
+              Official Examination Schedule
+            </p>
+
           </div>
-          <p className="text-muted-foreground">
-            Created: {new Date(timetable.createdAt).toLocaleDateString()}
-          </p>
+
+          <div className="flex gap-2">
+
+            <Button
+              variant="secondary"
+              onClick={() =>
+                exportTimetablePDF(
+                  timetable
+                )
+              }
+            >
+              Export PDF
+            </Button>
+
+            <Button
+              variant="secondary"
+              onClick={() =>
+                exportTimetablePNG(
+                  timetable
+                )
+              }
+            >
+              Export PNG
+            </Button>
+
+            <Button
+              variant="destructive"
+              onClick={
+                deleteSchedule
+              }
+            >
+              Delete
+            </Button>
+
+          </div>
+
         </div>
 
-        <div className="flex gap-2">
-          <Button
-    variant="outline"
-    onClick={() => exportTimetablePDF(timetable)}
-  >
-    Export PDF
-  </Button>
-
-  <Button
-    variant="outline"
-    onClick={() => exportTimetablePNG(timetable)}
-  >
-    Export PNG
-  </Button>
-          <Button
-            variant="destructive"
-            onClick={handleDelete}
-            className="gap-2"
-          >
-            <Trash2 className="h-4 w-4" />
-            Delete
-          </Button>
-        </div>
       </div>
 
-      {/* Statistics */}
+      {/* STATS */}
+
       {stats && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-  {[
-    { label: 'Courses', value: stats.totalCourses },
-    { label: 'Students', value: stats.totalStudents },
-    { label: 'Slots Used', value: stats.totalSlots },
-    { label: 'Conflicts', value: stats.conflictsCount },
-  ].map((item, i) => (
-    <Card key={i} className="text-center">
-      <CardContent className="pt-6">
-        <p className="text-3xl font-bold">{item.value}</p>
-        <p className="text-sm text-muted-foreground">{item.label}</p>
-      </CardContent>
-    </Card>
-  ))}
-</div>
+
+        <div
+          className="
+            grid
+            md:grid-cols-4
+            gap-4
+          "
+        >
+
+          <Card>
+
+            <CardContent className="p-6">
+
+              <div className="flex justify-between">
+
+                <div>
+
+                  <p className="text-sm text-muted-foreground">
+                    Courses
+                  </p>
+
+                  <p className="text-4xl font-bold text-primary">
+                    {
+                      stats.totalCourses
+                    }
+                  </p>
+
+                </div>
+
+                <BookOpen className="h-8 w-8 text-primary" />
+
+              </div>
+
+            </CardContent>
+
+          </Card>
+
+          <Card>
+
+            <CardContent className="p-6">
+
+              <div className="flex justify-between">
+
+                <div>
+
+                  <p className="text-sm text-muted-foreground">
+                    Students
+                  </p>
+
+                  <p className="text-4xl font-bold text-teal-600">
+                    {
+                      stats.totalStudents
+                    }
+                  </p>
+
+                </div>
+
+                <Users className="h-8 w-8 text-teal-600" />
+
+              </div>
+
+            </CardContent>
+
+          </Card>
+
+          <Card>
+
+            <CardContent className="p-6">
+
+              <div className="flex justify-between">
+
+                <div>
+
+                  <p className="text-sm text-muted-foreground">
+                    Slots
+                  </p>
+
+                  <p className="text-4xl font-bold text-green-600">
+                    {
+                      stats.totalSlots
+                    }
+                  </p>
+
+                </div>
+
+                <CalendarDays className="h-8 w-8 text-green-600" />
+
+              </div>
+
+            </CardContent>
+
+          </Card>
+
+          <Card>
+
+            <CardContent className="p-6">
+
+              <div className="flex justify-between">
+
+                <div>
+
+                  <p className="text-sm text-muted-foreground">
+                    Conflicts
+                  </p>
+
+                  <p className="text-4xl font-bold text-red-500">
+                    {
+                      stats.conflictsCount
+                    }
+                  </p>
+
+                </div>
+
+                <AlertTriangle className="h-8 w-8 text-red-500" />
+
+              </div>
+
+            </CardContent>
+
+          </Card>
+
+        </div>
+
       )}
 
-      {/* Configuration Info */}
+      {/* CONFIG */}
+
       <Card>
+
         <CardHeader>
-          <CardTitle>Configuration</CardTitle>
+
+          <CardTitle>
+            Examination Configuration
+          </CardTitle>
+
         </CardHeader>
+
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+
+          <div
+            className="
+              grid
+              md:grid-cols-4
+              gap-6
+            "
+          >
+
             <div>
-              <p className="font-semibold">Slots Per Day</p>
-              <p className="text-muted-foreground">
-                {timetable.config.slotsPerDay}
+
+              <p className="text-sm text-muted-foreground">
+                Start Date
               </p>
+
+              <p className="font-semibold">
+                {
+                  timetable.config
+                    .startDate
+                }
+              </p>
+
             </div>
+
             <div>
-              <p className="font-semibold">Max Days</p>
-              <p className="text-muted-foreground">
-                {timetable.config.maxDays}
+
+              <p className="text-sm text-muted-foreground">
+                Duration
               </p>
+
+              <p className="font-semibold">
+                {
+                  timetable.config
+                    .examDurationMins
+                } mins
+              </p>
+
             </div>
+
             <div>
-              <p className="font-semibold">Exam Duration</p>
-              <p className="text-muted-foreground">
-                {timetable.config.examDurationMins} min
+
+              <p className="text-sm text-muted-foreground">
+                Slots Per Day
               </p>
+
+              <p className="font-semibold">
+                {
+                  timetable.config
+                    .slotsPerDay
+                }
+              </p>
+
             </div>
+
             <div>
-              <p className="font-semibold">Break Duration</p>
-              <p className="text-muted-foreground">
-                {timetable.config.breakDurationMins} min
+
+              <p className="text-sm text-muted-foreground">
+                Total Days
               </p>
+
+              <p className="font-semibold">
+                {
+                  timetable.totalDaysUsed
+                }
+              </p>
+
             </div>
+
           </div>
+
         </CardContent>
+
       </Card>
 
-      {/* Timetable Views */}
-      <div id="timetable-content">
-      {timetable.slots && timetable.slots.length > 0 ? (
-        <Tabs value={view} onValueChange={(v: any) => setView(v)}>
-          <TabsList>
-            <TabsTrigger value="calendar">Calendar View</TabsTrigger>
-            <TabsTrigger value="grid">Grid View</TabsTrigger>
-          </TabsList>
+      {/* VIEWS */}
 
-          <TabsContent value="calendar">
-            <CalendarView timetable={timetable} />
-          </TabsContent>
+      <Tabs
+        value={view}
+        onValueChange={
+          setView
+        }
+      >
 
-          <TabsContent value="grid">
-            <GridView timetable={timetable} />
-          </TabsContent>
-        </Tabs>
-      ) : (
-        <Card>
-          <CardContent className="pt-6">
-            <p className="text-center text-muted-foreground">
-              No slots generated yet. Please generate the timetable.
-            </p>
-          </CardContent>
-        </Card>
-      )}
-      </div>
+        <TabsList>
 
-      {/* Hidden Export Layout */}
+          <TabsTrigger value="calendar">
+            Calendar View
+          </TabsTrigger>
 
-<div
-  id="timetable-export"
-  style={{
-    position: 'absolute',
-    left: '-99999px',
+          <TabsTrigger value="grid">
+            Grid View
+          </TabsTrigger>
 
-    backgroundColor: '#ffffff',
+        </TabsList>
 
-    color: '#000000',
+        <TabsContent value="calendar">
 
-    width: '1200px',
+          <CalendarView
+            timetable={
+              timetable
+            }
+          />
 
-    padding: '40px',
-  }}
->
-  <h1
-    style={{
-      fontSize: '28px',
-      marginBottom: '10px',
-    }}
-  >
-    {timetable.name}
-  </h1>
+        </TabsContent>
 
-  <p
-    style={{
-      marginBottom: '20px',
-    }}
-  >
-    Examination Timetable
-  </p>
+        <TabsContent value="grid">
 
-  <table
-    style={{
-      width: '100%',
-      borderCollapse: 'collapse',
-    }}
-  >
-    <thead>
-      <tr>
-        <th style={{ border: '1px solid black', padding: '10px' }}>
-          Date
-        </th>
+          <GridView
+            timetable={
+              timetable
+            }
+          />
 
-        <th style={{ border: '1px solid black', padding: '10px' }}>
-          Session
-        </th>
+        </TabsContent>
 
-        <th style={{ border: '1px solid black', padding: '10px' }}>
-          Start
-        </th>
+      </Tabs>
 
-        <th style={{ border: '1px solid black', padding: '10px' }}>
-          End
-        </th>
+      {/* BACK */}
 
-        <th style={{ border: '1px solid black', padding: '10px' }}>
-          Course
-        </th>
-      </tr>
-    </thead>
-
-    <tbody>
-      {timetable.slots.map(
-        (
-          slot: any,
-          index: number
-        ) => (
-          <tr key={index}>
-            <td
-              style={{
-                border:
-                  '1px solid black',
-                padding:
-                  '10px',
-              }}
-            >
-              {new Date(
-                slot.examDate
-              ).toLocaleDateString()}
-            </td>
-
-            <td
-              style={{
-                border:
-                  '1px solid black',
-                padding:
-                  '10px',
-              }}
-            >
-              {slot.timeSlot}
-            </td>
-
-            <td
-              style={{
-                border:
-                  '1px solid black',
-                padding:
-                  '10px',
-              }}
-            >
-              {slot.startTime}
-            </td>
-
-            <td
-              style={{
-                border:
-                  '1px solid black',
-                padding:
-                  '10px',
-              }}
-            >
-              {slot.endTime}
-            </td>
-
-            <td
-              style={{
-                border:
-                  '1px solid black',
-                padding:
-                  '10px',
-              }}
-            >
-              {slot.courseId?.code}
-            </td>
-          </tr>
-        )
-      )}
-    </tbody>
-  </table>
-</div>
-
-      {/* Back Button */}
       <Button
         variant="outline"
-        onClick={() => navigate('/timetables')}
-        className="gap-2"
+        onClick={() =>
+          navigate(
+            '/timetables'
+          )
+        }
       >
-        <ArrowLeft className="h-4 w-4" />
+        <ArrowLeft className="mr-2 h-4 w-4" />
+
         Back to Timetables
+
       </Button>
+
     </div>
   );
 }
