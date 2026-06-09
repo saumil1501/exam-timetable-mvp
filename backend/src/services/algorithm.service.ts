@@ -132,6 +132,34 @@ export class AlgorithmService {
   }
 
   /**
+   * Helper to get actual date by skipping Sundays
+   * @param startDateString The configured start date
+   * @param daysOffset How many active exam days to move forward (0 = day 1)
+   */
+  private getActualExamDate(startDateString: string, daysOffset: number): Date {
+    const date = new Date(startDateString);
+    
+    // If the chosen start date happens to be a Sunday, shift it to Monday immediately
+    if (date.getDay() === 0) {
+      date.setDate(date.getDate() + 1);
+    }
+
+    let activeDaysCounted = 0;
+    
+    // Increment the calendar date until we reach the required number of active exam days
+    while (activeDaysCounted < daysOffset) {
+      date.setDate(date.getDate() + 1);
+      
+      // 0 represents Sunday in JavaScript's getDay()
+      if (date.getDay() !== 0) {
+        activeDaysCounted++;
+      }
+    }
+
+    return date;
+  }
+
+  /**
    * Generate timetable using greedy graph coloring
    */
   async generateTimetable(timetableId: string): Promise<{
@@ -182,10 +210,9 @@ export class AlgorithmService {
 
         const { day, timeSlot } = this.mapColorToSlot(color, slotsPerDay);
 
-        // Calculate exam date
-        const baseDate = new Date(startDate);
-        const examDate = new Date(baseDate);
-        examDate.setDate(baseDate.getDate() + day - 1);
+        // ✅ Calculate exam date using the new Sunday-skipping logic
+        // day is 1-indexed, so we pass (day - 1) as the offset
+        const examDate = this.getActualExamDate(startDate, day - 1);
 
         // Determine start time based on session
         let slotStartTime = '';

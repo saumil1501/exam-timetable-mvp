@@ -15,17 +15,24 @@ export class CourseService {
       const skip = (page - 1) * limit;
 
       // Build search query
-      let query = {};
-      if (search) {
-        const searchRegex = new RegExp(search, 'i');
-        query = {
-          $or: [
-            { code: searchRegex },
-            { name: searchRegex },
-            { department: searchRegex },
-          ],
-        };
-      }
+      let query: any = {};
+
+if (search && search.trim() !== '') {
+
+  const searchRegex =
+    new RegExp(
+      search.trim(),
+      'i'
+    );
+
+  query = {
+    $or: [
+      { code: searchRegex },
+      { name: searchRegex },
+      { department: searchRegex },
+    ],
+  };
+}
 
       const courses = await Course.find(query)
         .skip(skip)

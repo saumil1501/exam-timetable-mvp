@@ -33,6 +33,10 @@ export default function Dashboard() {
 
   const statCards = [
     {
+
+      icon:
+        BookOpen,
+
       title:
         'Courses',
 
@@ -40,8 +44,7 @@ export default function Dashboard() {
         stats?.totalCourses ||
         0,
 
-      icon:
-        BookOpen,
+      
 
       color:
         'text-blue-600',

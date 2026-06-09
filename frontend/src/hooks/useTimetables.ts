@@ -38,26 +38,18 @@ export function useTimetables() {
     []
   );
 
-  const createTimetable = useCallback(
-    async (data: any) => {
-      try {
-        const response = await api.post<ApiResponse<any>>(
-          '/timetables',
-          data
-        );
-        return response.data.data;
-      } catch (err: any) {
-        throw new Error(err.message);
-      }
-    },
-    []
-  );
+  const createTimetable = useCallback(async (data: any) => {
+    try {
+      const response = await api.post<ApiResponse<any>>('/timetables', data);
+      return response.data.data;
+    } catch (err: any) {
+      throw new Error(err.message);
+    }
+  }, []);
 
   const getTimetableById = useCallback(async (id: string) => {
     try {
-      const response = await api.get<ApiResponse<any>>(
-        `/timetables/${id}`
-      );
+      const response = await api.get<ApiResponse<any>>(`/timetables/${id}`);
       return response.data.data;
     } catch (err: any) {
       throw new Error(err.message);
@@ -80,12 +72,11 @@ export function useTimetables() {
   );
 
   const deleteTimetable = useCallback(async (id: string) => {
-    try {
-      await api.delete(`/timetables/${id}`);
+    const response = await api.delete(`/timetables/${id}`);
+    if (response.data?.success) {
       return true;
-    } catch (err: any) {
-      throw new Error(err.message);
     }
+    throw new Error(response.data?.error || 'Deletion failed');
   }, []);
 
   const finalizeTimetable = useCallback(async (id: string) => {
@@ -121,23 +112,25 @@ export function useTimetables() {
     }
   }, []);
 
-  useEffect(() => {
-    fetchTimetables();
-  }, [fetchTimetables]);
-
   const generateTimetable = useCallback(async (id: string) => {
-  try {
-    const response = await api.post<ApiResponse<any>>(
-      `/timetables/${id}/generate`
-    );
-    return response.data.data;
-  } catch (err: any) {
-    throw new Error(err.message);
-  }
-}, []);
+    try {
+      const response = await api.post<ApiResponse<any>>(
+        `/timetables/${id}/generate`
+      );
+      return response.data.data;
+    } catch (err: any) {
+      throw new Error(err.message);
+    }
+  }, []);
+
+  // ❌ REMOVED auto-fetch — let pages call fetchTimetables() explicitly
+  // useEffect(() => {
+  //   fetchTimetables();
+  // }, [fetchTimetables]);
 
   return {
     timetables,
+    setTimetables,
     loading,
     error,
     total,

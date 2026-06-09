@@ -79,15 +79,7 @@ export function Navbar({
               Exam Timetable System
             </h1>
 
-            <p
-              className="
-                text-xs
-                text-muted-foreground
-                -mt-0.5
-              "
-            >
-              Conflict-Free Examination Scheduling
-            </p>
+            
           </div>
 
         </div>

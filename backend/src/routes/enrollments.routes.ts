@@ -4,6 +4,39 @@ import { logger } from '../utils/logger';
 
 const router = Router();
 
+// ===== BULK CREATE ENROLLMENTS =====
+router.post('/bulk', async (req, res) => {
+
+  try {
+
+    const { enrollments } = req.body;
+
+    if (!Array.isArray(enrollments) || enrollments.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Enrollments array required',
+      });
+    }
+
+    const created = await enrollmentService.bulkCreateEnrollments(
+      enrollments
+    );
+
+    return res.json({
+      success: true,
+      data: created,
+    });
+
+  } catch (error: any) {
+
+    return res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+
+  }
+});
+
 // ===== GET ALL ENROLLMENTS =====
 router.get('/', async (req, res) => {
   try {

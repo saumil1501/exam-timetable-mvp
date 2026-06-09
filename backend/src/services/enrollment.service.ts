@@ -5,6 +5,7 @@ import { logger } from '../utils/logger';
 import { Types } from 'mongoose';
 
 export class EnrollmentService {
+
   /**
    * Get all enrollments with pagination
    */
@@ -45,10 +46,9 @@ export class EnrollmentService {
       const studentObjectId = new Types.ObjectId(studentId);
       const courseObjectId = new Types.ObjectId(courseId);
 
-      // Check if enrollment already exists
       const existing = await Enrollment.findOne({
-        studentId: studentId,
-        courseId: courseId,
+        studentId,
+        courseId,
         status: 'active',
       } as any);
 
@@ -105,10 +105,8 @@ export class EnrollmentService {
         throw new Error('Invalid student ID');
       }
 
-      const studentObjectId = new Types.ObjectId(studentId);
-
       const enrollments = await Enrollment.find({
-        studentId: studentId,
+        studentId,
         status: 'active',
       } as any)
         .populate('courseId', 'code name department credits')
@@ -130,10 +128,8 @@ export class EnrollmentService {
         throw new Error('Invalid course ID');
       }
 
-      const courseObjectId = new Types.ObjectId(courseId);
-
       const enrollments = await Enrollment.find({
-        courseId: courseId,
+        courseId,
         status: 'active',
       } as any)
         .populate('studentId', 'studentCode name email department')
@@ -148,15 +144,15 @@ export class EnrollmentService {
 
   /**
    * Get all conflicts in the system
+   * Returns conflicts with IDs for frontend filtering
    */
   async getAllConflicts(): Promise<any[]> {
     try {
-      const enrollments = await Enrollment.find({}).lean();
+      const enrollments = await Enrollment.find({ status: 'active' }).lean();
 
-      // Map of student -> set of course IDs
+      // Map student -> set of course IDs
       const studentCourses = new Map<string, Set<string>>();
 
-      // Build the map
       for (const enrollment of enrollments) {
         const studentId = enrollment.studentId.toString();
         const courseId = enrollment.courseId.toString();
@@ -167,7 +163,7 @@ export class EnrollmentService {
         studentCourses.get(studentId)!.add(courseId);
       }
 
-      // Find conflicts
+      // Build conflict pairs
       const conflictList: any[] = [];
       for (const [studentId, courseIds] of studentCourses.entries()) {
         const courses = Array.from(courseIds);
@@ -184,24 +180,24 @@ export class EnrollmentService {
         }
       }
 
-      // Populate course and student details
+      // Populate names/codes alongside IDs
       const populatedConflicts = await Promise.all(
         conflictList.map(async (conflict) => {
           try {
-            const course1 = await Course.findById(
-              new Types.ObjectId(conflict.course1Id)
-            ).lean();
-            const course2 = await Course.findById(
-              new Types.ObjectId(conflict.course2Id)
-            ).lean();
-            const student = await Student.findById(
-              new Types.ObjectId(conflict.studentId)
-            ).lean();
+            const [course1, course2, student] = await Promise.all([
+              Course.findById(conflict.course1Id).lean(),
+              Course.findById(conflict.course2Id).lean(),
+              Student.findById(conflict.studentId).lean(),
+            ]);
 
             return {
-              student: student?.name || 'Unknown',
-              course1: course1?.code || 'Unknown',
-              course2: course2?.code || 'Unknown',
+              studentId: conflict.studentId,
+              student: (student as any)?.name || 'Unknown',
+              studentCode: (student as any)?.studentCode || '',
+              course1Id: conflict.course1Id,
+              course2Id: conflict.course2Id,
+              course1: (course1 as any)?.code || 'Unknown',
+              course2: (course2 as any)?.code || 'Unknown',
               severity: 'high',
             };
           } catch (err) {
@@ -238,7 +234,6 @@ export class EnrollmentService {
       const conflicts = await this.getAllConflicts();
       const potentialConflicts = conflicts.length;
 
-      // Get top enrolled courses
       const topCourses = await Enrollment.aggregate([
         { $match: { status: 'active' } },
         { $group: { _id: '$courseId', count: { $sum: 1 } } },
@@ -281,10 +276,7 @@ export class EnrollmentService {
   async canEnroll(
     studentId: string,
     courseId: string
-  ): Promise<{
-    canEnroll: boolean;
-    conflicts: string[];
-  }> {
+  ): Promise<{ canEnroll: boolean; conflicts: string[] }> {
     try {
       if (
         !Types.ObjectId.isValid(studentId) ||
@@ -293,13 +285,9 @@ export class EnrollmentService {
         throw new Error('Invalid IDs');
       }
 
-      const studentObjectId = new Types.ObjectId(studentId);
-      const courseObjectId = new Types.ObjectId(courseId);
-
-      // Check if already enrolled
       const existing = await Enrollment.findOne({
-        studentId: studentId,
-        courseId: courseId,
+        studentId,
+        courseId,
         status: 'active',
       } as any);
 
@@ -310,10 +298,7 @@ export class EnrollmentService {
         };
       }
 
-      return {
-        canEnroll: true,
-        conflicts: [],
-      };
+      return { canEnroll: true, conflicts: [] };
     } catch (error) {
       logger.error('Error checking enrollment eligibility:', error);
       throw error;
@@ -339,7 +324,7 @@ export class EnrollmentService {
 
       return {
         courseId,
-        courseName: course?.name || 'Unknown',
+        courseName: (course as any)?.name || 'Unknown',
         totalStudents: enrollments.length,
         enrolledStudents: enrollments.map((e: any) => ({
           id: e.studentId._id,

@@ -251,3 +251,17 @@ body {
     @apply font-sans;
   }
 }
+
+/* FullCalendar day header (Mon, Tue, ...) visibility fix */
+.calendar-wrapper .fc-col-header-cell-cushion {
+  color: hsl(var(--foreground)); /* uses your theme's text color */
+  font-weight: 600;
+  text-decoration: none;
+  padding: 8px 4px;
+}
+
+/* Optional: also make the date numbers use theme color */
+.calendar-wrapper .fc-daygrid-day-number {
+  color: hsl(var(--foreground));
+  text-decoration: none;
+}

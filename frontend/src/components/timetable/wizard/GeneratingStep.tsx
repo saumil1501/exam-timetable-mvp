@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useTimetables } from '@/hooks/useTimetables';
@@ -26,12 +26,17 @@ export default function GeneratingStep({
   const [error, setError] = useState<string>('');
   const [stats, setStats] = useState<any>(null);
 
+  // ✅ Guard against React StrictMode double-invoke
+  const hasStartedRef = useRef(false);
+
   useEffect(() => {
+    if (hasStartedRef.current) return;
+    hasStartedRef.current = true;
+
     const generateFlow = async () => {
       try {
         setProgress(10);
 
-        // Create timetable
         const result = await createTimetable({
           name: config.name,
           config: {
@@ -49,7 +54,6 @@ export default function GeneratingStep({
 
         setProgress(30);
 
-        // Run algorithm
         const generated = await generateTimetable(result._id);
 
         setProgress(100);
@@ -61,7 +65,7 @@ export default function GeneratingStep({
         }, 2000);
       } catch (err: any) {
         setStatus('error');
-        setError(err.message);
+        setError(err.message || 'Generation failed');
       }
     };
 

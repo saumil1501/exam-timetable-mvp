@@ -33,17 +33,19 @@ export default function CalendarView({ timetable }: CalendarViewProps) {
     })) || [];
 
   return (
-    <div className="rounded-xl bg-background p-4">
+    <div className="rounded-xl bg-background p-4 calendar-wrapper">
       <FullCalendar
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
         events={events}
         height="auto"
+        // 👇 these two lines ensure day names show
+        dayHeaders={true}
+        dayHeaderClassNames="text-black"
+        dayHeaderFormat={{ weekday: 'short' }} // 'short' = Mon, 'long' = Monday, 'narrow' = M
         eventContent={(eventInfo) => (
           <div className="rounded p-1 text-xs text-white w-full overflow-hidden">
-            <div className="font-bold truncate">
-              {eventInfo.event.title}
-            </div>
+            <div className="font-bold truncate">{eventInfo.event.title}</div>
             <div className="text-[10px] opacity-90">
               {eventInfo.event.extendedProps.startTime} -{' '}
               {eventInfo.event.extendedProps.endTime}

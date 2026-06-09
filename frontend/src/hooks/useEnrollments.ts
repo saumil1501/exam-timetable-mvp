@@ -90,6 +90,23 @@ export function useEnrollments() {
     }
   }, []);
 
+  const bulkCreateEnrollments =
+  async (
+    enrollments: Array<{
+      studentId: string;
+      courseId: string;
+    }>
+  ) => {
+
+    const response =
+      await api.post(
+        '/enrollments/bulk',
+        { enrollments }
+      );
+
+    return response.data.data;
+  };
+
   useEffect(() => {
     fetchEnrollments();
   }, [fetchEnrollments]);
@@ -100,6 +117,7 @@ export function useEnrollments() {
     error,
     total,
     pages,
+    bulkCreateEnrollments,
     fetchEnrollments,
     createEnrollment,
     deleteEnrollment,
